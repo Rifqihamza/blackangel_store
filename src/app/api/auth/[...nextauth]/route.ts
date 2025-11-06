@@ -1,59 +1,89 @@
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/bcrypt";
 
-export const authOptions = {
+// 🔹 Definisikan tipe event signIn (karena NextAuth belum ekspor resminya)
+interface SignInEvent {
+    user?: {
+        id?: string | number;
+        name?: string | null;
+        email?: string | null;
+        role?: string | null;
+    };
+    account?: unknown;
+    profile?: unknown;
+    isNewUser?: boolean;
+}
+
+export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
-    session: { strategy: "jwt" as const },
+    session: { strategy: "jwt" },
     secret: process.env.NEXTAUTH_SECRET,
     providers: [
         CredentialsProvider({
             name: "Email",
             credentials: {
                 email: { label: "Email", type: "text" },
-                password: { label: "Password", type: "password" }
+                password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials.password) return null;
-                const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email },
+                });
                 if (!user) return null;
+
                 const ok = await verifyPassword(credentials.password, user.password);
                 if (!ok) return null;
-                // return object stored in token
-                return { id: user.id, name: user.name, email: user.email, role: user.role };
-            }
-        })
+
+                // pastikan id bertipe string agar cocok dengan NextAuth
+                return {
+                    id: String(user.id),
+                    name: user.name ?? null,
+                    email: user.email,
+                    role: user.role ?? null,
+                };
+            },
+        }),
     ],
     callbacks: {
         async jwt({ token, user }) {
-            if (user) token.role = (user as any).role;
+            if (user && "role" in user) {
+                token.role = (user as { role?: string }).role;
+            }
             return token;
         },
         async session({ session, token }) {
-            (session as any).user.role = token.role;
+            if (session.user) {
+                session.user.id = token.sub ?? "";
+                session.user.role = token.role as string | undefined;
+            }
             return session;
-        }
+        },
     },
     pages: { signIn: "/login" },
-    // inside NextAuth options
     events: {
-        async signIn(message) {
-            // message = { user, account, profile, isNewUser }
+        async signIn(message: SignInEvent) {
+            const userId = Number(message.user?.id ?? 0);
+            if (!userId) return;
+
             try {
                 await prisma.activityLog.create({
                     data: {
-                        userId: Number((message.user as any).id),
+                        userId,
                         action: "signIn",
                         ipAddress: null,
-                        userAgent: null
-                    }
+                        userAgent: null,
+                    },
                 });
-            } catch (e) { /* swallow errors in event */ }
-        }
-    }
-
+            } catch {
+                // abaikan error event logging
+            }
+        },
+    },
 };
 
 const handler = NextAuth(authOptions);
