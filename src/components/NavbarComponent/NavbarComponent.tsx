@@ -1,8 +1,9 @@
 "use client"
 import { BellIcon, ShoppingCart } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
-export default function Navbar() {
+export default function NavbarComponent() {
     return (
         <section id="navbar">
             <header className="fixed top-0 left-0 w-full bg-white shadow z-50">
@@ -60,14 +61,12 @@ export default function Navbar() {
                         </div>
                         <ul className="flex items-center gap-4 text-lg">
                             <li><a href="#">Home</a></li>
-                            <li><a href="#">Product</a></li>
-                            <li><a href="#">Contact</a></li>
-                            <li><a href="#" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">Login</a></li>
-                            <li><a href="#" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">Register</a></li>
+                            <li><a href="#productPage">Product</a></li>
+                            <li><a href="#contactPage">Contact</a></li>
+                            <li><Link href="/authPage/login" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">Login</Link></li>
+                            <li><Link href="/authPage/register" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">Register</Link></li>
                         </ul>
-
                     </div>
-
                 </nav>
             </header>
         </section>
