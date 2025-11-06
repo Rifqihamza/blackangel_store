@@ -4,13 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 const createSchema = z.object({
-    name: z.string().min(1),
+    name: z.string(),
     description: z.string().optional(),
-    price: z.number().nonnegative(),
-    stock: z.number().int().nonnegative().optional().default(0),
-    categoryId: z.number().optional(),
-    image: z.string().url().optional()
+    price: z.number(),
+    stock: z.number(),
+    categoryId: z.number(), // ✅ WAJIB
+    image: z.string().optional(),
 });
+
 
 export async function GET(req: Request) {
     const url = new URL(req.url);
@@ -25,10 +26,12 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ data: items, total });
 }
-
 export async function POST(req: Request) {
     try {
-        await requireAdmin();
+        // Ambil user admin
+        const admin = await requireAdmin(); // return { id: number, name, ... }
+        const adminId = Number(admin.id);
+
         const json = await req.json();
         const data = createSchema.parse(json);
 
@@ -38,9 +41,10 @@ export async function POST(req: Request) {
                 description: data.description,
                 price: data.price,
                 stock: data.stock,
-                categoryId: data.categoryId,
-                image: data.image
-            }
+                image: data.image,
+                category: { connect: { id: data.categoryId } }, // wajib
+                user: { connect: { id: adminId } },             // wajib
+            },
         });
 
         return NextResponse.json({ data: product }, { status: 201 });
@@ -48,3 +52,4 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: err ?? "Invalid" }, { status: 422 });
     }
 }
+

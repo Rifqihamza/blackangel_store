@@ -6,37 +6,50 @@ import Image from "next/image";
 export default function HomePage() {
     return (
         <>
-            <span className="bg-secondary/20 -z-50 absolute inset-0 w-full h-full"></span>
-            <section id="homePage" className="relative w-full min-h-dvh overflow-hidden">
-                <div className="w-full h-full flex flex-row">
-                    <div className="absolute inset-0 flex flex-row justify-between items-center">
-                        {/* Title */}
-                        <div className="flex flex-col justify-center gap-2 max-w-md">
-                            <h1 className="text-5xl font-semibold leading-tight">Black Angel Store</h1>
-                            <div>
-                                <p className="text-4xl font-normal">The Incredible Wear</p>
-                                <span className="text-lg font-thin">Find Your Perfect Outfit Now!</span>
-                            </div>
-                            <a
-                                href="#product"
-                                className="w-fit flex flex-row items-center gap-1 group text-secondary"
-                            >
-                                See More
-                                <ArrowRight size={18} className="group-hover:ml-1 duration-300" />
-                            </a>
-                        </div>
+            {/* Background Overlay */}
+            <span className="absolute inset-0 w-full h-full bg-secondary/20 -z-50"></span>
 
-                        {/* Image */}
-                        <div className="flex items-center justify-center border">
-                            <Image
-                                src="/img/hero2.png"
-                                alt="Picture Man for Hero"
-                                width={400}
-                                height={400}
-                                className="object-cover"
-                                priority
-                            />
+            {/* Hero Section */}
+            <section
+                id="homePage"
+                className="relative w-full min-h-dvh flex items-center justify-center overflow-hidden px-6 md:px-16"
+            >
+                <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-10 w-full max-w-6xl">
+                    {/* Left Content */}
+                    <div className="flex flex-col justify-center gap-4 text-center md:text-left max-w-md">
+                        <div>
+                            <h1 className="text-3xl md:text-5xl font-semibold leading-tight">
+                                Black Angel Store
+                            </h1>
+                            <p className="text-lg md:text-3xl font-normal">
+                                The Incredible Wear
+                            </p>
+                            <span className="block text-sm md:text-lg font-light text-gray-600">
+                                Find Your Perfect Outfit Now!
+                            </span>
                         </div>
+                        <a
+                            href="#product"
+                            className="w-fit mx-auto md:mx-0 flex items-center gap-1 group text-secondary mt-2"
+                        >
+                            See More
+                            <ArrowRight
+                                size={18}
+                                className="group-hover:ml-2 transition-all duration-300"
+                            />
+                        </a>
+                    </div>
+
+                    {/* Right Image */}
+                    <div className="flex items-center justify-center">
+                        <Image
+                            src="/img/hero2.png"
+                            alt="Hero Image"
+                            width={400}
+                            height={400}
+                            className="object-contain w-64 sm:w-80 md:w-[400px]"
+                            priority
+                        />
                     </div>
                 </div>
             </section>

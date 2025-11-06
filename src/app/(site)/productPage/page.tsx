@@ -11,8 +11,8 @@ export default function ProductPage() {
 
     return (
         <section id="productPage">
-            <div className="container mx-auto px-6 py-10 w-full min-h-dvh">
-                <h1 className="text-2xl font-bold mb-6">Our Products</h1>
+            <div className="container mx-auto px-6 py-10 w-full">
+                <h1 className="text-2xl font-semibold">Our Products</h1>
                 {products.length === 0 ? (
                     <p>No products available.</p>
                 ) : (

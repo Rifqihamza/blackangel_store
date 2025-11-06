@@ -1,5 +1,6 @@
 "use client"
 
+import FooterComponent from "@/components/FooterComponent/FooterComponent";
 import ContactPage from "./(site)/contactPage/page";
 import HomePage from "./(site)/homePage/page";
 import ProductPage from "./(site)/productPage/page";
@@ -14,6 +15,7 @@ export default function App() {
         <ProductPage />
         <ContactPage />
       </div>
+      <FooterComponent />
     </main>
   )
 }

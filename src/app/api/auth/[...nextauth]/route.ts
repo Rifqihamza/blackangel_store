@@ -1,25 +1,13 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
+import NextAuth, { Session, User, Account, Profile } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/bcrypt";
 
-// 🔹 Definisikan tipe event signIn (karena NextAuth belum ekspor resminya)
-interface SignInEvent {
-    user?: {
-        id?: string | number;
-        name?: string | null;
-        email?: string | null;
-        role?: string | null;
-    };
-    account?: unknown;
-    profile?: unknown;
-    isNewUser?: boolean;
-}
-
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
     adapter: PrismaAdapter(prisma),
-    session: { strategy: "jwt" },
+    session: { strategy: "jwt" as const },
     secret: process.env.NEXTAUTH_SECRET,
     providers: [
         CredentialsProvider({
@@ -30,60 +18,57 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials.password) return null;
-
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
-                });
+                const user = await prisma.user.findUnique({ where: { email: credentials.email } });
                 if (!user) return null;
-
                 const ok = await verifyPassword(credentials.password, user.password);
                 if (!ok) return null;
 
-                // pastikan id bertipe string agar cocok dengan NextAuth
                 return {
-                    id: String(user.id),
-                    name: user.name ?? null,
+                    id: user.id,
+                    name: user.name,
                     email: user.email,
-                    role: user.role ?? null,
+                    role: user.role,
                 };
             },
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
-            if (user && "role" in user) {
-                token.role = (user as { role?: string }).role;
+        async jwt({
+            token,
+            user,
+            account,
+            profile,
+            isNewUser,
+        }: {
+            token: JWT;
+            user?: User | (User & { id: number }) | null;
+            account: Account | null;
+            profile?: Profile;
+            isNewUser?: boolean;
+        }) {
+            if (user) {
+                // Jika datang dari AdapterUser (id string), convert ke number
+                token.id = typeof user.id === "string" ? parseInt(user.id) : user.id;
+                token.role = (user as any).role; // sudah aman karena tipe role ada di user
             }
             return token;
         },
-        async session({ session, token }) {
-            if (session.user) {
-                session.user.id = token.sub ?? "";
-                session.user.role = token.role as string | undefined;
-            }
+
+        async session({
+            session,
+            token,
+            user,
+        }: {
+            session: Session;
+            token: JWT;
+            user: User;
+        }) {
+            session.user.id = token.id as number;
+            session.user.role = token.role as "USER" | "ADMIN";
             return session;
         },
     },
     pages: { signIn: "/login" },
-    events: {
-        async signIn(message: SignInEvent) {
-            const userId = Number(message.user?.id ?? 0);
-            if (!userId) return;
-
-            try {
-                await prisma.activityLog.create({
-                    data: {
-                        userId,
-                        action: "signIn",
-                        ipAddress: null,
-                        userAgent: null,
-                    },
-                });
-            } catch {
-                // abaikan error event logging
-            }
-        },
-    },
 };
 
 const handler = NextAuth(authOptions);
