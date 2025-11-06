@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { requireAdmin } from "@/lib/auth"
@@ -14,15 +14,16 @@ const updateSchema = z.object({
 
 // 🟢 GET /api/products/[id]
 export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
 ) {
-    const id = Number(params.id)
-    if (isNaN(id))
+    const { id } = await context.params
+    const productId = Number(id)
+    if (isNaN(productId))
         return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
 
     const product = await prisma.product.findUnique({
-        where: { id },
+        where: { id: productId },
         include: { category: true },
     })
 
@@ -34,50 +35,46 @@ export async function GET(
 
 // 🟡 PUT /api/products/[id]
 export async function PUT(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         await requireAdmin()
-        const id = Number(params.id)
-        if (isNaN(id))
+        const { id } = await context.params
+        const productId = Number(id)
+        if (isNaN(productId))
             return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
 
         const json = await req.json()
         const data = updateSchema.parse(json)
 
         const updated = await prisma.product.update({
-            where: { id },
+            where: { id: productId },
             data,
         })
 
         return NextResponse.json({ data: updated })
     } catch (err) {
-        return NextResponse.json(
-            { error: err ?? "Invalid" },
-            { status: 422 }
-        )
+        return NextResponse.json({ error: String(err) }, { status: 422 })
     }
 }
 
 // 🔴 DELETE /api/products/[id]
 export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         await requireAdmin()
-        const id = Number(params.id)
-        if (isNaN(id))
+        const { id } = await context.params
+        const productId = Number(id)
+        if (isNaN(productId))
             return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
 
-        await prisma.product.delete({ where: { id } })
+        await prisma.product.delete({ where: { id: productId } })
 
         return NextResponse.json({ success: true })
     } catch (err) {
-        return NextResponse.json(
-            { error: err ?? "Failed" },
-            { status: 500 }
-        )
+        return NextResponse.json({ error: String(err) }, { status: 500 })
     }
 }
