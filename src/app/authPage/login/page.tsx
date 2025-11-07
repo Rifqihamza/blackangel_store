@@ -6,7 +6,7 @@ export default function LoginPage() {
     const router = useRouter()
     return (
         <section>
-            <button onClick={() => router.back()} className="cursor-pointer flex flex-row items-center justify-center absolute top-4 left-4 gap-2 hover:opacity-60">
+            <button onClick={() => router.replace("/")} className="cursor-pointer flex flex-row items-center justify-center absolute top-4 left-4 gap-2 hover:opacity-60">
                 <ArrowLeft size={20} />
                 Back Home
             </button>
@@ -29,7 +29,7 @@ export default function LoginPage() {
                                 <div className="flex items-center justify-between">
                                     <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">Password</label>
                                     <div className="text-sm">
-                                        <a href="#" className="font-semibold text-primary hover:text-indigo-500">Forgot password?</a>
+                                        <a href="/authPage/forgot" className="font-semibold text-primary hover:text-indigo-500">Forgot password?</a>
                                     </div>
                                 </div>
                                 <div className="mt-2">
@@ -38,7 +38,7 @@ export default function LoginPage() {
                             </div>
 
                             <div>
-                                <button type="submit" className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button>
+                                <button type="submit" className="flex w-full justify-center rounded-md bg-secondary hover:bg-primary duration-300 cursor-pointer px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs">Sign in</button>
                             </div>
                         </form>
 

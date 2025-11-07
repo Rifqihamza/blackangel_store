@@ -21,43 +21,43 @@ enum OrderStatus {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  email     String    @unique
+  email     String   @unique
   password  String
-  role      Role      @default(USER)
+  role      Role     @default(USER)
   image     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  products     Product[]
-  orders       Order[]
-  cart         Cart?
-  wishlist     Wishlist[]
-  activities   ActivityLog[]
-  sessions     Session[]
-  accounts     Account[]
-  addresses    Address[]
+  products      Product[]
+  orders        Order[]
+  cart          Cart?
+  wishlist      Wishlist[]
+  activities    ActivityLog[]
+  sessions      Session[]
+  accounts      Account[]
+  addresses     Address[]
   notifications Notification[]
-  histories    History[]
-  reviews      Review[]
+  histories     History[]
+  reviews       Review[]
 }
 
 model Product {
-  id          Int          @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float
-  stock       Int          @default(0)
+  stock       Int      @default(0)
   image       String?
   categoryId  Int
   userId      Int
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  category   Category      @relation(fields: [categoryId], references: [id])
-  user       User          @relation(fields: [userId], references: [id])
+  category   Category    @relation(fields: [categoryId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
   orderItems OrderItem[]
   wishlist   Wishlist[]
   cartItems  CartItem[]
@@ -98,21 +98,21 @@ model Wishlist {
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  userId      Int
-  total       Float
-  status      OrderStatus @default(PENDING)
-  paymentId   Int?
-  shippingId  Int?
-  couponId    Int?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  total      Float
+  status     OrderStatus @default(PENDING)
+  paymentId  Int?
+  shippingId Int?        @unique
+  couponId   Int?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
-  user        User        @relation(fields: [userId], references: [id])
-  payment     Payment?    @relation(fields: [paymentId], references: [id])
-  items       OrderItem[]
-  shipping    Shipping?   @relation(fields: [shippingId], references: [id])
-  coupon      Coupon?     @relation(fields: [couponId], references: [id])
+  user     User        @relation(fields: [userId], references: [id])
+  payment  Payment?    @relation(fields: [paymentId], references: [id])
+  items    OrderItem[]
+  shipping Shipping?   @relation(fields: [shippingId], references: [id])
+  coupon   Coupon?     @relation(fields: [couponId], references: [id])
 }
 
 model OrderItem {
@@ -180,41 +180,42 @@ model Account {
 }
 
 model Address {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  label     String   // e.g. "Home", "Office"
-  recipient String
-  phone     String
-  address   String
-  city      String
-  province  String
+  id         Int     @id @default(autoincrement())
+  userId     Int
+  label      String // e.g. "Home", "Office"
+  recipient  String
+  phone      String
+  address    String
+  city       String
+  province   String
   postalCode String
-  isDefault Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
+  isDefault  Boolean @default(false)
+  user       User    @relation(fields: [userId], references: [id])
 }
 
 model Shipping {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   courier     String
   trackingId  String?
-  status      String   @default("PENDING")
+  status      String    @default("PENDING")
   shippedAt   DateTime?
   deliveredAt DateTime?
   address     String
   city        String
   province    String
   postalCode  String
-  order       Order[]
+
+  order Order? @relation
 }
 
 model Coupon {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  discount    Float
-  validFrom   DateTime
-  validTo     DateTime
-  isActive    Boolean  @default(true)
-  orders      Order[]
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  discount  Float
+  validFrom DateTime
+  validTo   DateTime
+  isActive  Boolean  @default(true)
+  orders    Order[]
 }
 
 model Notification {

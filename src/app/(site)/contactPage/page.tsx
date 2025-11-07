@@ -1,11 +1,11 @@
-import { Send } from "lucide-react";
+import { Send, Mail, MapPin, Phone } from "lucide-react";
 
 export default function ContactPage() {
     return (
         <section id="contactPage">
             <div className="container mx-auto px-6 py-10 w-full">
                 <h2 className="text-2xl font-semibold">Reach Us!</h2>
-                <div className="bg-white flex flex-col md:flex-row md:gap-8 gap-2 w-full px-6 rounded-md overflow-hidden">
+                <div className="flex flex-col md:flex-row md:gap-8 gap-2 p-6 mt-3 w-full overflow-hidden border border-secondary/20 rounded-xl">
                     {/* Left: Form */}
                     <div className="flex-1 py-8">
                         <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -67,22 +67,19 @@ export default function ContactPage() {
                     </div>
 
                     {/* Right: Contact Info */}
-                    <div className="border border-secondary rounded-xl p-8 md:w-80 flex flex-col">
-                        <h3 className="text-lg font-semibold mb-3">Contact Information</h3>
-                        <p className="text-sm  mb-6">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias, magnam!
-                        </p>
-                        <ul className="space-y-2 text-sm mb-4">
+                    <div className="flex flex-col gap-5 items-staret">
+                        <h1 className="text-xl font-semibold">Contact</h1>
+                        <ul className="text-sm space-y-4">
                             <li className="flex items-start gap-3">
-                                <span className="text-lg">📍</span>
+                                <MapPin size={20} />
                                 <span>9757 Aspen Lane South Richmond Hill, NY 11419</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <span className="text-lg">📞</span>
+                                <Phone size={20} />
                                 <span>+1 (291) 939 9321</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <span className="text-lg">✉️</span>
+                                <Mail size={20} />
                                 <span>info@mywebsite.com</span>
                             </li>
                         </ul>

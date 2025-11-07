@@ -1,16 +1,21 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 
 export async function getSessionServer() {
-    return getServerSession(authOptions);
+    return getServerSession(authOptions)
 }
 
 export async function requireAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session || (session).user.role !== "ADMIN") {
-        const res = NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        throw res;
+    const session = await getServerSession(authOptions)
+
+    if (!session || !session.user) {
+        throw new Error("Unauthorized")
     }
-    return session;
+
+    if (session.user.role !== "ADMIN") {
+        throw new Error("Forbidden")
+    }
+
+    // ✅ return user object
+    return session.user
 }

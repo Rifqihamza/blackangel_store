@@ -1,36 +1,36 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/bcrypt";
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { hashPassword } from "@/lib/bcrypt"
+import { z } from "zod"
 
-const bodySchema = z.object({
-    name: z.string().min(2),
-    email: z.string().email(),
-    password: z.string().min(6)
-});
+const RegisterSchema = z.object({
+    email: z.email(),
+    password: z.string().min(6, "Password minimal 6 karakter"),
+})
 
 export async function POST(req: Request) {
     try {
-        const json = await req.json();
-        const data = bodySchema.parse(json);
+        const body = await req.json()
+        const { email, password } = RegisterSchema.parse(body)
 
-        const existing = await prisma.user.findUnique({ where: { email: data.email } });
-        if (existing) return NextResponse.json({ error: "Email already used" }, { status: 400 });
+        const existingUser = await prisma.user.findUnique({ where: { email } })
+        if (existingUser) {
+            return NextResponse.json({ message: "Email sudah terdaftar" }, { status: 409 })
+        }
 
-        const hashed = await hashPassword(data.password);
-        const user = await prisma.user.create({
-            data: { name: data.name, email: data.email, password: hashed }
-        });
+        const hashedPassword = await hashPassword(password)
 
-        // record activity
-        await prisma.activityLog.create({
-            data: { userId: user.id, action: "register", ipAddress: null, userAgent: null }
-        });
+        await prisma.user.create({
+            data: { email, password: hashedPassword, role: "USER" },
+        })
 
-        // send minimal response (no password)
-        return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } }, { status: 201 });
-    } catch (err: any) {
-        const msg = err?.message ?? "Invalid input";
-        return NextResponse.json({ error: msg }, { status: 422 });
+        return NextResponse.json({ message: "Akun berhasil dibuat!" }, { status: 201 })
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: error.errors[0].message }, { status: 400 })
+        }
+
+        console.error("Register Error:", error)
+        return NextResponse.json({ message: "Terjadi kesalahan server" }, { status: 500 })
     }
 }

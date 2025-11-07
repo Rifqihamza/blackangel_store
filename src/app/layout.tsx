@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-
 import SessionProviderWrapper from "@/components/ProviderComponent/SessionProvider";
 
 export const metadata: Metadata = {
@@ -13,18 +12,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" data-theme="corporate">
-      <body
-        className="antialiased"
-      >
-        <SessionProviderWrapper>
-          {children}
-        </SessionProviderWrapper>
+      <body className="antialiased">
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
-    </html >
+    </html>
   );
 }

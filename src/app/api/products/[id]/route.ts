@@ -12,7 +12,7 @@ const updateSchema = z.object({
     image: z.string().url().optional(),
 })
 
-// 🟢 GET /api/products/[id]
+// 🟢 GET — semua user bisa lihat produk tanpa login
 export async function GET(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -33,7 +33,7 @@ export async function GET(
     return NextResponse.json({ data: product })
 }
 
-// 🟡 PUT /api/products/[id]
+// 🟡 PUT — hanya admin
 export async function PUT(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -55,11 +55,14 @@ export async function PUT(
 
         return NextResponse.json({ data: updated })
     } catch (err) {
-        return NextResponse.json({ error: String(err) }, { status: 422 })
+        return (
+            console.error(err),
+            NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        )
     }
 }
 
-// 🔴 DELETE /api/products/[id]
+// 🔴 DELETE — hanya admin
 export async function DELETE(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -75,6 +78,9 @@ export async function DELETE(
 
         return NextResponse.json({ success: true })
     } catch (err) {
-        return NextResponse.json({ error: String(err) }, { status: 500 })
+        return (
+            console.error(err),
+            NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        )
     }
 }

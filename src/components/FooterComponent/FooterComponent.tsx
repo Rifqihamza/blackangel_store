@@ -1,3 +1,4 @@
+import { Mail, MapPin, Phone } from "lucide-react"
 import Image from "next/image"
 
 export default function FooterComponent() {
@@ -57,17 +58,17 @@ export default function FooterComponent() {
                 </div>
                 <div className="flex flex-col gap-2 items-staret">
                     <h1 className="text-xl font-semibold">Contact</h1>
-                    <ul className="text-sm">
+                    <ul className="text-sm space-y-4">
                         <li className="flex items-start gap-3">
-                            <span className="text-lg">📍</span>
+                            <MapPin size={20} />
                             <span>9757 Aspen Lane South Richmond Hill, NY 11419</span>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="text-lg">📞</span>
+                            <Phone size={20} />
                             <span>+1 (291) 939 9321</span>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="text-lg">✉️</span>
+                            <Mail size={20} />
                             <span>info@mywebsite.com</span>
                         </li>
                     </ul>

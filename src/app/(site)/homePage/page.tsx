@@ -7,14 +7,14 @@ export default function HomePage() {
     return (
         <>
             {/* Background Overlay */}
-            <span className="absolute inset-0 w-full h-full bg-secondary/20 -z-50"></span>
 
             {/* Hero Section */}
             <section
                 id="homePage"
-                className="relative w-full min-h-dvh flex items-center justify-center overflow-hidden px-6 md:px-16"
+                className="w-full h-full min-h-dvh md:max-h-[90vh] overflow-hidden flex items-center justify-center px-8 md:px-4 relative"
             >
-                <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-10 w-full max-w-6xl">
+                <span className="absolute inset-0 bg-secondary/10 -z-50"></span>
+                <div className="flex flex-col md:flex-row items-center justify-around gap-10 w-full">
                     {/* Left Content */}
                     <div className="flex flex-col justify-center gap-4 text-center md:text-left max-w-md">
                         <div>
@@ -29,7 +29,7 @@ export default function HomePage() {
                             </span>
                         </div>
                         <a
-                            href="#product"
+                            href="#productPage"
                             className="w-fit mx-auto md:mx-0 flex items-center gap-1 group text-secondary mt-2"
                         >
                             See More
@@ -45,9 +45,9 @@ export default function HomePage() {
                         <Image
                             src="/img/hero2.png"
                             alt="Hero Image"
-                            width={400}
-                            height={400}
-                            className="object-contain w-64 sm:w-80 md:w-[400px]"
+                            width={500}
+                            height={500}
+                            className="object-contain w-full md:w-[500px]"
                             priority
                         />
                     </div>

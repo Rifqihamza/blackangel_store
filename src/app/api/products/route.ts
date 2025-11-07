@@ -1,39 +1,45 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { NextResponse } from "next/server"
+import { z } from "zod"
+import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/auth"
 
 const createSchema = z.object({
     name: z.string(),
     description: z.string().optional(),
     price: z.number(),
     stock: z.number(),
-    categoryId: z.number(), // ✅ WAJIB
+    categoryId: z.number(),
     image: z.string().optional(),
-});
+})
 
-
+// 🟢 GET — semua user bisa akses tanpa login
 export async function GET(req: Request) {
-    const url = new URL(req.url);
-    const page = Number(url.searchParams.get("page") ?? 1);
-    const limit = Number(url.searchParams.get("limit") ?? 12);
-    const skip = (page - 1) * limit;
+    const url = new URL(req.url)
+    const page = Number(url.searchParams.get("page") ?? 1)
+    const limit = Number(url.searchParams.get("limit") ?? 12)
+    const skip = (page - 1) * limit
 
     const [items, total] = await Promise.all([
-        prisma.product.findMany({ take: limit, skip, orderBy: { createdAt: "desc" }, include: { category: true } }),
-        prisma.product.count()
-    ]);
+        prisma.product.findMany({
+            take: limit,
+            skip,
+            orderBy: { createdAt: "desc" },
+            include: { category: true },
+        }),
+        prisma.product.count(),
+    ])
 
-    return NextResponse.json({ data: items, total });
+    return NextResponse.json({ data: items, total })
 }
+
+// 🟡 POST — hanya admin
 export async function POST(req: Request) {
     try {
-        // Ambil user admin
-        const admin = await requireAdmin(); // return { id: number, name, ... }
-        const adminId = Number(admin.id);
+        const admin = await requireAdmin() // ⛔ hanya admin
+        const adminId = Number(admin.id)
 
-        const json = await req.json();
-        const data = createSchema.parse(json);
+        const json = await req.json()
+        const data = createSchema.parse(json)
 
         const product = await prisma.product.create({
             data: {
@@ -42,14 +48,16 @@ export async function POST(req: Request) {
                 price: data.price,
                 stock: data.stock,
                 image: data.image,
-                category: { connect: { id: data.categoryId } }, // wajib
-                user: { connect: { id: adminId } },             // wajib
+                category: { connect: { id: data.categoryId } },
+                user: { connect: { id: adminId } },
             },
-        });
+        })
 
-        return NextResponse.json({ data: product }, { status: 201 });
+        return NextResponse.json({ data: product }, { status: 201 })
     } catch (err) {
-        return NextResponse.json({ error: err ?? "Invalid" }, { status: 422 });
+        return NextResponse.json(
+            { error: "Unauthorized or invalid request", detail: String(err) },
+            { status: 401 }
+        )
     }
 }
-
