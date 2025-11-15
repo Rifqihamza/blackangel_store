@@ -1,12 +1,15 @@
 "use client"
 
-import { BellIcon, House, Menu, Shirt, ShoppingCart, X, Phone } from "lucide-react"
+import { House, Menu, Shirt, ShoppingCart, X, Phone, User, Settings, LogOut } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
-
+import { useSession, signOut } from "next-auth/react"
+import AvatarDaisy from "../AvatarComponent/AvatarComponent"
+import NotificationDropdown from "../NotificationButton/NotificationButton"
 export default function NavbarComponent() {
+    const { data: session } = useSession()
     const [sideNav, setSideNav] = useState(false)
     const pathname = usePathname()
     const router = useRouter()
@@ -14,9 +17,9 @@ export default function NavbarComponent() {
     const closeSideNav = useCallback(() => setSideNav(false), [])
     const openSideNav = useCallback(() => setSideNav(true), [])
 
-    // 🧭 Smart scroll or navigate
     const handleScroll = (id: string) => {
-        const offset = 90 // tinggi navbar kamu (px)
+        const offset = 90
+
         if (pathname === "/") {
             const section = document.querySelector(id)
             if (section) {
@@ -28,7 +31,6 @@ export default function NavbarComponent() {
         }
         closeSideNav()
     }
-
 
     return (
         <section id="navbar" className="sticky top-0 left-0 w-full bg-white shadow z-50">
@@ -47,7 +49,7 @@ export default function NavbarComponent() {
                     </h1>
                 </div>
 
-                {/* CENTER - Search Bar */}
+                {/* CENTER */}
                 <div className="w-full flex justify-center items-center gap-4">
                     <div className="relative w-full">
                         <input
@@ -77,54 +79,77 @@ export default function NavbarComponent() {
                     </button>
                 </div>
 
-                {/* RIGHT - Desktop Nav */}
+
+                {/* RIGHT - Desktop */}
                 <div className="w-1/3 md:flex items-center justify-end gap-6 hidden md:pl-4">
-                    <div className="flex items-center gap-4">
-                        <Link href="/cartPage"><ShoppingCart size={20} /></Link>
-                        <a href="#"><BellIcon size={20} /></a>
-                        <span>|</span>
+                    <div className="flex items-center">
+                        <Link href="/cartPage" className="btn btn-ghost btn-circle relative">
+                            <ShoppingCart size={20} />
+                        </Link>
+                        <NotificationDropdown />
+                        <span className="ml-2">|</span>
                     </div>
+
                     <ul className="flex items-center gap-4 text-lg">
-                        <li>
-                            <button
-                                className="cursor-pointer"
-                                onClick={() => {
-                                    handleScroll("#homePage")
-                                    closeSideNav()
-                                }}>
-                                Home
-                            </button>
+                        <li><button className="cursor-pointer group relative" onClick={() => handleScroll("#homePage")}>
+                            Home
+                            <span className="w-0 absolute bottom-0 left-0 h-0.5 group-hover:w-full bg-secondary duration-300"></span>
+                        </button>
                         </li>
-                        <li>
-                            <button
-                                className="cursor-pointer"
-                                onClick={() => {
-                                    handleScroll("#productPage")
-                                    closeSideNav()
-                                }}>
-                                Product
-                            </button>
+                        <li><button className="cursor-pointer group relative" onClick={() => handleScroll("#productPage")}>
+                            Product
+                            <span className="w-0 absolute bottom-0 left-0 h-0.5 group-hover:w-full bg-secondary duration-300"></span>
+                        </button>
                         </li>
-                        <li>
-                            <button
-                                className="cursor-pointer"
-                                onClick={() => {
-                                    handleScroll("#contactPage")
-                                    closeSideNav()
-                                }}
-                            >
-                                Contact
-                            </button>
+                        <li><button className="cursor-pointer group relative" onClick={() => handleScroll("#contactPage")}>
+                            Contact
+                            <span className="w-0 absolute bottom-0 left-0 h-0.5 group-hover:w-full bg-secondary duration-300"></span>
+                        </button>
                         </li>
-                        <li>
-                            <Link href="/authPage/login" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">Login</Link>
-                        </li>
-                        <li>
-                            <Link href="/authPage/register" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">Register</Link>
-                        </li>
+
+                        {session ? (
+                            <li className="relative group cursor-pointer">
+                                {/* Avatar DaisyUI */}
+                                <AvatarDaisy />
+
+                                {/* Dropdown */}
+                                <div className="absolute right-0 mt-3 w-40 bg-white shadow-lg rounded-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible duration-300">
+                                    <Link href="/profile" className="px-3 py-2 hover:bg-gray-100 rounded flex flex-row items-center gap-1">
+                                        <User size={18} />
+                                        Profile
+                                    </Link>
+                                    <Link href="/profile" className="px-3 py-2 hover:bg-gray-100 rounded flex flex-row items-center gap-1">
+                                        <Settings size={18} />
+                                        Setting
+                                    </Link>
+                                    <button
+                                        onClick={() => signOut()}
+                                        className="w-full text-red-600 px-3 py-2 hover:bg-gray-100 rounded flex flex-row items-center gap-1"
+                                    >
+                                        <LogOut size={18} />
+                                        Logout
+                                    </button>
+                                </div>
+                            </li>
+                        ) : (
+                            <>
+                                <li>
+                                    <Link href="/authPage/login" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">
+                                        Login
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/authPage/register" className="border border-gray-300 rounded-lg px-2 py-1 hover:bg-black hover:text-white duration-300">
+                                        Register
+                                    </Link>
+                                </li>
+                            </>
+                        )}
                     </ul>
                 </div>
             </nav>
+
+
             {/* Mobile Side Nav */}
             <>
                 <div
@@ -145,33 +170,53 @@ export default function NavbarComponent() {
                     </div>
 
                     <nav className="flex flex-col gap-4 text-lg">
-                        <button
-                            onClick={() => handleScroll("#homePage")}
-                            className="text-left text-2xl flex flex-row items-center gap-2">
-                            <House size={24} />
-                            Home
+                        <button onClick={() => handleScroll("#homePage")} className="text-left text-2xl flex items-center gap-2">
+                            <House size={24} /> Home
                         </button>
-                        <button
-                            onClick={() => handleScroll("#productPage")}
-                            className="text-left text-2xl flex flex-row items-center gap-2">
-                            <Shirt size={24} />
-                            Product
+                        <button onClick={() => handleScroll("#productPage")} className="text-left text-2xl flex items-center gap-2">
+                            <Shirt size={24} /> Product
                         </button>
-                        <button
-                            onClick={() => handleScroll("#contactPage")}
-                            className="text-left text-2xl flex flex-row items-center gap-2">
-                            <Phone />
-                            Contact
+                        <button onClick={() => handleScroll("#contactPage")} className="text-left text-2xl flex items-center gap-2">
+                            <Phone /> Contact
                         </button>
-                        <div className="mt-6 flex items-center gap-4">
-                            <a href="#"><ShoppingCart size={24} /></a>
-                            <a href="#"><BellIcon size={24} /></a>
+
+                        <div className="mt-6 flex items-center gap-2">
+                            <Link href="/cartPage" className="btn btn-ghost btn-circle relative">
+                                <ShoppingCart size={20} />
+                            </Link>
+                            <NotificationDropdown />
                         </div>
+
                         <div className="border-t border-gray-200 my-4" />
-                        <div className="flex flex-row items-center justify-between gap-4">
-                            <Link href="/authPage/login" className="block border w-full text-center border-gray-300 rounded-lg px-3 py-2 hover:bg-black hover:text-white duration-300">Login</Link>
-                            <Link href="/authPage/register" className="block border w-full text-center border-gray-300 rounded-lg px-3 py-2 hover:bg-black hover:text-white duration-300">Register</Link>
-                        </div>
+
+                        {session ? (
+                            <div className="mt-4">
+                                <div className="flex items-center gap-3">
+                                    <AvatarDaisy />
+
+                                    <div>
+                                        <p className="font-semibold">{session.user?.name}</p>
+                                        <p className="text-sm text-gray-500">{session.user?.email}</p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => { signOut(); closeSideNav(); }}
+                                    className="mt-3 w-full border border-gray-300 rounded-lg px-3 py-2 text-center hover:bg-black hover:text-white duration-300"
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-row items-center justify-between gap-4">
+                                <Link href="/authPage/login" className="block border w-full text-center border-gray-300 rounded-lg px-3 py-2 hover:bg-black hover:text-white duration-300">
+                                    Login
+                                </Link>
+                                <Link href="/authPage/register" className="block border w-full text-center border-gray-300 rounded-lg px-3 py-2 hover:bg-black hover:text-white duration-300">
+                                    Register
+                                </Link>
+                            </div>
+                        )}
                     </nav>
                 </aside>
             </>

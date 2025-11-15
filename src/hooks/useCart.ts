@@ -1,29 +1,20 @@
-"use client"
-
-import { useEffect, useState, useCallback } from "react"
-import {
-    apiGetCart,
-    apiAddToCart,
-    apiUpdateCartItem,
-    apiRemoveCartItem,
-} from "@/services/cartService"
-
-interface CartItem {
-    id: number
-
-}
+import { useState, useEffect, useCallback } from "react"
+import { CartItemType } from "@/types/variable"
+import { apiGetCart, apiAddToCart, apiRemoveCartItem, apiUpdateCartItem } from "@/services/cartService"
 export function useCart() {
-    const [items, setItems] = useState<CartItem[]>([])
+    const [items, setItems] = useState<CartItemType[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     const load = useCallback(async () => {
+        setLoading(true)
         try {
-            setLoading(true)
             const data = await apiGetCart()
-            if (data?.success) setItems(data.data)
+            if (data?.success) {
+                setItems(data.data ?? [])
+            }
         } catch (err) {
-            console.log(err)
+            console.error(err)
             setError("Failed to load cart")
         } finally {
             setLoading(false)
@@ -35,20 +26,18 @@ export function useCart() {
     }, [load])
 
     const addToCart = async (productId: number, quantity = 1) => {
+        setLoading(true)
         try {
-            setLoading(true)
             await apiAddToCart(productId, quantity)
             await load()
-        } catch {
-            setError("Failed to add item")
         } finally {
             setLoading(false)
         }
     }
 
     const updateItem = async (id: number, quantity: number) => {
+        setLoading(true)
         try {
-            setLoading(true)
             await apiUpdateCartItem(id, quantity)
             await load()
         } finally {
@@ -57,8 +46,8 @@ export function useCart() {
     }
 
     const removeItem = async (id: number) => {
+        setLoading(true)
         try {
-            setLoading(true)
             await apiRemoveCartItem(id)
             await load()
         } finally {

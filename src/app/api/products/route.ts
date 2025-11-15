@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         prisma.product.findMany({
             take: limit,
             skip,
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: "asc" },
             include: { category: true },
         }),
         prisma.product.count(),

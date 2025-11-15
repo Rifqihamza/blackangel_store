@@ -1,69 +1,67 @@
 "use client"
 
-import Image from "next/image"
-import { useProduct } from "@/hooks/useProduct"
-import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
+import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
-import { useRouter } from "next/navigation"
 import ActionBuyButton from "@/components/ActionBuyButton/ActionBuyButton"
-// Contoh data dummy ulasan
-interface Review {
-    id: number
-    user: string
-    rating: number
-    comment: string
-    date: string
-}
+import { ProductType } from "@/types/variable"
+import { useReviews } from "@/hooks/useReviews"
 
 export default function ProductDetailPage() {
     const { id } = useParams()
+    const router = useRouter()
     const productId = Number(id)
-    const { product, loading, error } = useProduct(productId)
-    const [quantity, setQuantity] = useState(1)
-    const [reviews, setReviews] = useState<Review[]>([])
-    const router = useRouter();
 
-    // Simulasi fetch ulasan (nanti bisa diganti pakai API asli)
+    const [product, setProduct] = useState<ProductType | null>(null)
+    // const [reviews, setReviews] = useState<ReviewType[]>([])
+    const { reviews, loading: reviewLoading } = useReviews(productId)
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [quantity, setQuantity] = useState(1)
+
     useEffect(() => {
-        const mockReviews: Review[] = [
-            {
-                id: 1,
-                user: "Reza Rahadian",
-                rating: 5,
-                comment: "Kualitas bagus, pengiriman cepat banget. Recommended seller!",
-                date: "2025-11-01",
-            },
-            {
-                id: 2,
-                user: "Dimas Mentai",
-                rating: 4,
-                comment: "Barang sesuai deskripsi, cuma packing agak kurang rapi.",
-                date: "2025-11-02",
-            },
-        ]
-        // schedule update asynchronously to avoid synchronous state update inside effect
-        const timer = setTimeout(() => setReviews(mockReviews), 0)
-        return () => clearTimeout(timer)
+        const fetchProduct = async () => {
+            try {
+                const res = await fetch(`/api/products/${productId}`)
+                const data = await res.json()
+
+                if (data.error) {
+                    setError("Produk tidak ditemukan")
+                } else {
+                    setProduct(data.product) // match API format
+                }
+            } catch (err) {
+                console.error(err)
+                setError("Gagal memuat data produk")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchProduct()
     }, [productId])
 
     if (loading) return <p className="text-center py-10">Loading...</p>
-    if (error) return <p className="text-center text-red-500">Failed to load</p>
+    if (error) return <p className="text-center text-red-500">{error}</p>
     if (!product) return <p className="text-center py-10">Product not found</p>
 
     return (
-        <main className="w-full mt-6">
-            {/* === DETAIL PRODUK === */}
+        <main className="container max-w-7xl mx-auto px-6 py-10">
+            {/* Back button */}
+            <button
+                onClick={() => router.push("/")}
+                className="flex items-center gap-2 mb-6 hover:opacity-70 transition"
+            >
+                <ArrowLeft size={20} /> Back Home
+            </button>
 
-            <section className="relative container w-full max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-3 gap-8">
-                {/* Back Home */}
-                <button onClick={() => router.replace("/")} className="cursor-pointer flex flex-row items-center justify-center absolute top-0 left-4 gap-2 hover:opacity-60">
-                    <ArrowLeft size={20} />
-                    Back Home
-                </button>
-                {/* LEFT: Product Images */}
+            {/* === GRID PRODUK === */}
+            <div className="grid lg:grid-cols-3 gap-8">
+                {/* LEFT: GAMBAR PRODUK */}
                 <div className="col-span-1">
-                    <div className="relative w-full h-[400px] bg-gray-100 rounded-xl overflow-hidden">
+                    <div className="relative w-full h-96 bg-gray-100 rounded-xl overflow-hidden">
                         {product.image && (
                             <Image
                                 src={product.image}
@@ -73,49 +71,28 @@ export default function ProductDetailPage() {
                             />
                         )}
                     </div>
-
-                    {/* Thumbnails */}
-                    <div className="flex gap-3 mt-4">
-                        {[...Array(5)].map((_, i) => (
-                            <div
-                                key={i}
-                                className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 cursor-pointer border border-gray-200 hover:border-secondary transition"
-                            >
-                                {product.image && (
-                                    <Image
-                                        src={product.image}
-                                        alt={product.name}
-                                        width={80}
-                                        height={80}
-                                        className="object-cover"
-                                    />
-                                )}
-                            </div>
-                        ))}
-                    </div>
                 </div>
 
-                {/* MIDDLE: Product Info */}
+                {/* MIDDLE: DETAIL PRODUK */}
                 <div className="col-span-1">
-                    <h1 className="text-2xl font-semibold mb-2">{product.name}</h1>
-                    <p className="text-gray-600 mb-3">⭐ 4.8 | Terjual 10+</p>
-                    <div className="text-3xl font-bold text-secondary mb-6">
+                    <h1 className="text-2xl font-semibold mb-3">
+                        {product.name}
+                    </h1>
+
+                    <p className="text-3xl font-bold text-secondary mb-5">
                         Rp {product.price.toLocaleString("id-ID")}
-                    </div>
+                    </p>
 
-                    <div className="border-t border-gray-200 pt-4">
-                        <h2 className="text-lg font-semibold text-gray-700 mb-2">Detail Produk</h2>
-                        <p className="text-gray-600 leading-relaxed">
-                            {product.description}
-                        </p>
+                    <p className="text-gray-700 leading-relaxed">
+                        {product.description}
+                    </p>
 
-                        <div className="mt-4 text-sm text-gray-500">
-                            <p>Stok: <span className="text-gray-800 font-medium">{product.stock ?? 10}</span></p>
-                        </div>
-                    </div>
+                    <p className="mt-4 text-sm text-gray-500">
+                        Stok: <span className="text-gray-800 font-medium">{product.stock}</span>
+                    </p>
                 </div>
 
-                {/* RIGHT: Add to Cart Section */}
+                {/* RIGHT: BELI */}
                 <div className="col-span-1">
                     <div className="border border-gray-200 rounded-xl shadow-sm p-6 sticky top-24">
                         <h2 className="text-lg font-semibold mb-4 text-gray-800">Atur Jumlah dan Catatan</h2>
@@ -141,35 +118,32 @@ export default function ProductDetailPage() {
                             <span>Rp {(product.price * quantity).toLocaleString("id-ID")}</span>
                         </div>
                         <div className="flex flex-col gap-2 mt-2">
-                            <ActionBuyButton productId={product.id} />
-                            <ActionBuyButton productId={product.id} />
+                            <ActionBuyButton productId={product.id} quantity={quantity} />
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* === REVIEWS SECTION === */}
-            <div className="container max-w-7xl mx-auto px-6 py-10 border-t border-gray-200">
+            {/* === REVIEW SECTION === */}
+            <div className="mt-12 border-t pt-10">
                 <h2 className="text-2xl font-semibold mb-6">Ulasan Pembeli</h2>
 
-                {reviews.length === 0 ? (
-                    <p className="text-gray-500">Belum ada ulasan untuk produk ini.</p>
+                {reviewLoading ? (
+                    <p className="text-gray-500">Memuat ulasan...</p>
+                ) : reviews.length === 0 ? (
+                    <p className="text-gray-500">Belum ada ulasan.</p>
                 ) : (
                     <div className="space-y-6">
-                        {reviews.map((review) => (
-                            <div
-                                key={review.id}
-                                className="border border-gray-200 rounded-xl p-5 hover:shadow-sm transition"
-                            >
-                                <div className="flex justify-between items-center mb-2">
-                                    <p className="font-semibold text-gray-800">{review.user}</p>
-                                    <span className="text-sm text-gray-500">{review.date}</span>
+                        {reviews.map((r) => (
+                            <div key={r.id} className="border p-5 rounded-lg">
+                                <div className="flex justify-between mb-1">
+                                    <p className="font-semibold">{r.user?.name || "User"}</p>
+                                    <span className="text-sm text-gray-500">
+                                        {new Date(r.createdAt).toLocaleDateString()}
+                                    </span>
                                 </div>
-                                <div className="flex items-center gap-1 text-yellow-500 mb-2">
-                                    {"⭐".repeat(review.rating)}
-                                    {"☆".repeat(5 - review.rating)}
-                                </div>
-                                <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                                <p className="text-yellow-500">{"⭐".repeat(r.rating)}</p>
+                                <p className="text-gray-700 mt-1">{r.comment}</p>
                             </div>
                         ))}
                     </div>

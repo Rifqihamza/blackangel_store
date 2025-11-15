@@ -1,3 +1,4 @@
+// src/app/api/cart/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -5,29 +6,43 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const AddToCartSchema = z.object({
-    productId: z.number().int().positive(),
-    quantity: z.number().int().min(1).default(1),
+    productId: z.number(),
+    quantity: z.number().int().min(1),
 });
 
 export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session)
-        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json(
+            { success: false, data: [], error: "Unauthorized" },
+            { status: 401 }
+        );
 
     const userId = session.user.id;
 
     const cart = await prisma.cart.findUnique({
         where: { userId },
-        include: { items: { include: { product: true } } },
+        include: {
+            items:
+            {
+                include: { product: true }
+            }
+        },
     });
 
-    return NextResponse.json({ success: true, data: cart?.items ?? [] });
+    return NextResponse.json({
+        success: true,
+        data: cart?.items ?? [],
+    });
 }
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session)
-        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json(
+            { success: false, error: "Unauthorized" },
+            { status: 401 }
+        );
 
     try {
         const body = await req.json();
@@ -35,7 +50,10 @@ export async function POST(req: Request) {
         const userId = session.user.id;
 
         let cart = await prisma.cart.findUnique({ where: { userId } });
-        if (!cart) cart = await prisma.cart.create({ data: { userId } });
+
+        if (!cart) {
+            cart = await prisma.cart.create({ data: { userId } });
+        }
 
         const existingItem = await prisma.cartItem.findFirst({
             where: { cartId: cart.id, productId },
@@ -52,18 +70,17 @@ export async function POST(req: Request) {
             });
         }
 
-        const updatedCart = await prisma.cart.findUnique({
-            where: { id: cart.id },
-            include: { items: { include: { product: true } } },
+        const updatedItems = await prisma.cartItem.findMany({
+            where: { cartId: cart.id },
+            include: { product: true },
         });
 
-        return NextResponse.json({ success: true, data: updatedCart?.items });
+        return NextResponse.json({ success: true, data: updatedItems });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const message = error.issues?.[0]?.message ?? "Invalid request";
-            return NextResponse.json({ success: false, error: message }, { status: 400 });
-        }
-        console.error("Cart POST error:", error);
-        return NextResponse.json({ success: false, error: "Failed to add to cart" }, { status: 500 });
+        console.error(error);
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : "Invalid request" },
+            { status: 400 }
+        );
     }
 }

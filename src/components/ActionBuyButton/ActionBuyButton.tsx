@@ -7,19 +7,26 @@ import LoginAlertModal from "@/components/LoginAlertModal/LoginAlertModal"
 
 interface AddToCartButtonProps {
     productId: number
+    quantity?: number
 }
 
-export default function ActionBuyButton({ productId }: AddToCartButtonProps) {
-    const { addToCart, loading } = useCart()
+export default function ActionBuyButton({ productId, quantity }: AddToCartButtonProps) {
+    const { addToCart } = useCart()
     const { isAuthenticated } = useAuth()
+
     const [showLoginModal, setShowLoginModal] = useState(false)
+    const [isAdding, setIsAdding] = useState(false)
+    const [isBuying, setIsBuying] = useState(false)
 
     const handleAddToCart = async () => {
         if (!isAuthenticated) {
             setShowLoginModal(true)
             return
         }
-        await addToCart(productId)
+        setIsAdding(true)
+
+        await addToCart(productId, quantity)
+        setIsAdding(false)
     }
 
     const handleBuyNow = async () => {
@@ -27,28 +34,35 @@ export default function ActionBuyButton({ productId }: AddToCartButtonProps) {
             setShowLoginModal(true)
             return
         }
-        await addToCart(productId)
-        // Arahkan ke halaman checkout
+
+        setIsBuying(true)
+
+        await addToCart(productId, quantity)
+
+        setIsBuying(false)
+
         window.location.href = "/checkout"
     }
 
     return (
         <>
             <div className="flex gap-3 w-full">
+                {/* ADD TO CART */}
                 <button
                     onClick={handleAddToCart}
-                    disabled={loading}
+                    disabled={isAdding}
                     className="w-1/2 cursor-pointer border bg-secondary text-white hover:bg-white hover:text-secondary hover:border-secondary transition-colors px-4 py-2 rounded-lg"
                 >
-                    {loading ? "Menambah..." : "+ Keranjang"}
+                    {isAdding ? "Menambah..." : "+ Keranjang"}
                 </button>
 
+                {/* BUY NOW */}
                 <button
                     onClick={handleBuyNow}
-                    disabled={loading}
+                    disabled={isBuying}
                     className="w-1/2 cursor-pointer border border-secondary bg-white text-secondary hover:bg-secondary hover:text-white transition-colors px-4 py-2 rounded-lg"
                 >
-                    {loading ? "Memproses..." : "Beli Sekarang"}
+                    {isBuying ? "Memproses..." : "Beli Sekarang"}
                 </button>
             </div>
 

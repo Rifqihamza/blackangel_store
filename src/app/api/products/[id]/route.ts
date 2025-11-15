@@ -19,19 +19,31 @@ export async function GET(
 ) {
     const { id } = await context.params
     const productId = Number(id)
+
     if (isNaN(productId))
-        return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
+        return NextResponse.json({ success: false, message: "Invalid product ID" }, { status: 400 })
 
     const product = await prisma.product.findUnique({
         where: { id: productId },
-        include: { category: true },
+        include: {
+            category: true,
+            reviews: {
+                include: {
+                    user: { select: { name: true } }
+                }
+            }
+        }
     })
 
     if (!product)
-        return NextResponse.json({ error: "Not found" }, { status: 404 })
+        return NextResponse.json({ success: false, message: "Not found" }, { status: 404 })
 
-    return NextResponse.json({ data: product })
+    return NextResponse.json({
+        success: true,
+        product
+    })
 }
+
 
 // 🟡 PUT — hanya admin
 export async function PUT(

@@ -1,22 +1,22 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server"
+import { getToken } from "next-auth/jwt"
+import type { NextRequest } from "next/server"
 
 export async function proxy(req: NextRequest) {
-    const { pathname } = req.nextUrl;
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const { pathname } = req.nextUrl
 
-    // protect admin routes
     if (pathname.startsWith("/admin")) {
-        const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
         if (!token || token.role !== "ADMIN") {
-            const url = req.nextUrl.clone();
-            url.pathname = "/login";
-            return NextResponse.redirect(url);
+            const url = req.nextUrl.clone()
+            url.pathname = "/authPage/login"
+            return NextResponse.redirect(url)
         }
     }
-    return NextResponse.next();
+
+    return NextResponse.next()
 }
 
 export const config = {
-    matcher: ["/admin/:path*"]
-};
+    matcher: ["/admin/:path*"],
+}
