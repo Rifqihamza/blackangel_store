@@ -3,46 +3,15 @@ import Image from "next/image"
 import { CartItemType } from "@/types/variable"
 import { Trash } from "lucide-react"
 import { useState } from "react"
+import ConfirmationModal from "../Modal/ConfirmationModal"
 
-interface Props {
+interface CardProps {
     item: CartItemType
     onUpdate: (id: number, quantity: number) => void
     onRemove: (id: number) => void
 }
 
-interface DeleteModalProps {
-    open: boolean
-    onClose: () => void
-    onConfirm: () => void
-}
-
-function DeleteConfirmationModal({ open, onClose, onConfirm }: DeleteModalProps) {
-    if (!open) return null
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 bg-opacity-40">
-            <div className="bg-white rounded-lg p-6 shadow-lg min-w-[300px]">
-                <h3 className="font-bold text-lg">Hapus Item?</h3>
-                <p className="py-4">Apakah Anda yakin ingin menghapus item ini dari keranjang?</p>
-                <div className="flex justify-end gap-2">
-                    <button onClick={onClose} className="btn">
-                        Batal
-                    </button>
-                    <button
-                        onClick={() => {
-                            onConfirm()
-                            onClose()
-                        }}
-                        className="btn btn-error text-white"
-                    >
-                        Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-export default function CartItemCard({ item, onUpdate, onRemove }: Props) {
+export default function CartItemCard({ item, onUpdate, onRemove }: CardProps) {
     const [modalOpen, setModalOpen] = useState(false)
 
     return (
@@ -81,18 +50,22 @@ export default function CartItemCard({ item, onUpdate, onRemove }: Props) {
                     +
                 </button>
 
-                <DeleteConfirmationModal
-                    open={modalOpen}
-                    onClose={() => setModalOpen(false)}
-                    onConfirm={() => onRemove(item.id)}
-                />
-
                 <button
                     onClick={() => setModalOpen(true)}
                     className="text-red-500 hover:text-red-700 ml-4 cursor-pointer"
                 >
                     <Trash size={22} />
                 </button>
+
+                <ConfirmationModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    onConfirm={() => onRemove(item.id)}
+                    title="Remove from cart?"
+                    message="Do you really want to remove this item from your cart?"
+                    confirmText="Yes, remove it"
+                    cancelText="No, keep it"
+                />
             </div>
         </div>
     )

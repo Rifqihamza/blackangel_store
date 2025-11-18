@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/auth"
+import { requireAdmin } from "@/lib/requireAdmin"
 
 const createSchema = z.object({
     name: z.string(),

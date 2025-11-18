@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { useRegister } from "@/hooks/useRegister"
-import ToastComponent from "@/components/ToastComponent/Toast"
+import ToastComponent from "@/components/Toast/Toast"
 
 export default function RegisterPage() {
     const router = useRouter()
@@ -25,19 +25,23 @@ export default function RegisterPage() {
         const res = await register(form)
 
         if (res?.success) {
-            setToast({ message: "Akun berhasil dibuat!", type: "success" })
-            setTimeout(() => router.push("/authPage/login"), 1500)
-        } else {
-            setToast({ message: res?.message || "Pendaftaran gagal", type: "error" })
-        }
+            setToast({ message: "Yeay, Akunmu berhasil dibuat!", type: "success" })
 
-        setTimeout(() => setToast(null), 2500)
+            // Tampilkan toast selama 2.5 detik, lalu pindah halaman
+            setTimeout(() => {
+                setToast(null)
+                router.push("/authPage/login")
+            }, 2500)
+        } else {
+            setToast({ message: res?.message || "Yah, Pendaftaran gagal nih.", type: "error" })
+
+            // Hilangkan toast setelah 3 detik
+            setTimeout(() => setToast(null), 3000)
+        }
     }
 
     return (
         <section className="flex flex-col items-center justify-center min-h-screen bg-white relative">
-            {toast && <ToastComponent message={toast.message} type={toast.type} />}
-
             <button
                 onClick={() => router.replace("/")}
                 className="cursor-pointer flex items-center gap-2 absolute top-4 left-4 hover:opacity-60"
@@ -47,6 +51,9 @@ export default function RegisterPage() {
             </button>
 
             <div className="w-full max-w-md p-8 space-y-6">
+                {toast && (
+                    <ToastComponent message={toast.message} type={toast.type} />
+                )}
                 <h2 className="text-center text-2xl font-bold text-gray-900">Create your account</h2>
 
                 {error && <p className="text-red-500 text-sm">{error}</p>}

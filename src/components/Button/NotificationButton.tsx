@@ -17,7 +17,7 @@ const mockNotifications: Notification[] = [
     { id: 4, title: "Reminder", description: "Don't forget your meeting at 3 PM.", date: "2d ago" },
 ];
 
-export default function NotificationDropdown() {
+export default function NotificationButton() {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 

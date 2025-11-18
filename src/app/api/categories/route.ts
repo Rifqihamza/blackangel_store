@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/serverSession";
 
 const createSchema = z.object({ name: z.string().min(1) });
 

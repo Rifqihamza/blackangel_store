@@ -1,6 +1,6 @@
 "use client"
 
-import ProductCard from "@/components/ProductComponent/productCard"
+import ProductCard from "@/components/ProductComponent/ProductCard"
 import { useProducts } from "@/hooks/useProducts"
 
 export default function ProductPage() {

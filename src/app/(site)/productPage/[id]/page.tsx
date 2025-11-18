@@ -1,51 +1,26 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
-import ActionBuyButton from "@/components/ActionBuyButton/ActionBuyButton"
-import { ProductType } from "@/types/variable"
 import { useReviews } from "@/hooks/useReviews"
+import { useDetailProduct } from "@/hooks/useDetailProduct"
+import Image from "next/image"
+import AddToCartButton from "@/components/Button/AddToCartButton"
+import PurchaseButton from "@/components/Button/PurchaseButton"
 
 export default function ProductDetailPage() {
     const { id } = useParams()
     const router = useRouter()
     const productId = Number(id)
 
-    const [product, setProduct] = useState<ProductType | null>(null)
-    // const [reviews, setReviews] = useState<ReviewType[]>([])
     const { reviews, loading: reviewLoading } = useReviews(productId)
-
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
     const [quantity, setQuantity] = useState(1)
+    const { product, loading, error } = useDetailProduct(productId)
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const res = await fetch(`/api/products/${productId}`)
-                const data = await res.json()
-
-                if (data.error) {
-                    setError("Produk tidak ditemukan")
-                } else {
-                    setProduct(data.product) // match API format
-                }
-            } catch (err) {
-                console.error(err)
-                setError("Gagal memuat data produk")
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchProduct()
-    }, [productId])
-
-    if (loading) return <p className="text-center py-10">Loading...</p>
-    if (error) return <p className="text-center text-red-500">{error}</p>
-    if (!product) return <p className="text-center py-10">Product not found</p>
+    if (loading) return <p className="text-center py-10">Loading...</p>;
+    if (error) return <p className="text-center text-red-500">{error}</p>;
+    if (!product) return <p className="text-center py-10">Produk tidak ditemukan</p>;
 
     return (
         <main className="container max-w-7xl mx-auto px-6 py-10">
@@ -66,6 +41,7 @@ export default function ProductDetailPage() {
                             <Image
                                 src={product.image}
                                 alt={product.name}
+                                loading='eager'
                                 fill
                                 className="object-cover"
                             />
@@ -117,8 +93,9 @@ export default function ProductDetailPage() {
                             <span>Subtotal</span>
                             <span>Rp {(product.price * quantity).toLocaleString("id-ID")}</span>
                         </div>
-                        <div className="flex flex-col gap-2 mt-2">
-                            <ActionBuyButton productId={product.id} quantity={quantity} />
+                        <div className="flex flex-row gap-2">
+                            <AddToCartButton productId={product.id} quantity={quantity} />
+                            <PurchaseButton productId={product.id} quantity={quantity} />
                         </div>
                     </div>
                 </div>

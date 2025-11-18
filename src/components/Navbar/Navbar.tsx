@@ -1,18 +1,29 @@
 "use client"
 
-import { House, Menu, Shirt, ShoppingCart, X, Phone, User, Settings, LogOut } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
 import { useCallback, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import AvatarDaisy from "../AvatarComponent/AvatarComponent"
-import NotificationDropdown from "../NotificationButton/NotificationButton"
+import AvatarDaisy from "../Avatar/ProfileAvatar"
+import NotificationButton from "../Button/NotificationButton"
+import Link from "next/link"
+import Image from "next/image"
+import {
+    House,
+    Menu,
+    Shirt,
+    ShoppingCart,
+    X,
+    Phone,
+    User,
+    Settings,
+    LogOut
+} from "lucide-react"
+
 export default function NavbarComponent() {
     const { data: session } = useSession()
-    const [sideNav, setSideNav] = useState(false)
     const pathname = usePathname()
     const router = useRouter()
+    const [sideNav, setSideNav] = useState(false)
 
     const closeSideNav = useCallback(() => setSideNav(false), [])
     const openSideNav = useCallback(() => setSideNav(true), [])
@@ -51,28 +62,6 @@ export default function NavbarComponent() {
 
                 {/* CENTER */}
                 <div className="w-full flex justify-center items-center gap-4">
-                    <div className="relative w-full">
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className="border border-gray-300 rounded-lg w-full px-4 py-1 pl-10 outline-none"
-                        />
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-5 h-5 absolute top-1/2 left-3 -translate-y-1/2 text-gray-500"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                            />
-                        </svg>
-                    </div>
-
                     {/* Mobile Menu Button */}
                     <button className="md:hidden block cursor-pointer" onClick={openSideNav}>
                         <Menu size={28} />
@@ -82,13 +71,20 @@ export default function NavbarComponent() {
 
                 {/* RIGHT - Desktop */}
                 <div className="w-1/3 md:flex items-center justify-end gap-6 hidden md:pl-4">
-                    <div className="flex items-center">
-                        <Link href="/cartPage" className="btn btn-ghost btn-circle relative">
-                            <ShoppingCart size={20} />
-                        </Link>
-                        <NotificationDropdown />
-                        <span className="ml-2">|</span>
-                    </div>
+                    {session ? (
+                        <div className="flex items-center">
+                            <Link href="/cartPage" className="btn btn-ghost btn-circle relative">
+                                <ShoppingCart size={20} />
+                            </Link>
+                            <Link href="/settingPage">
+                                <NotificationButton />
+                            </Link>
+                            <span className="ml-2">|</span>
+                        </div>
+                    ) : (
+                        <div></div>
+                    )}
+
 
                     <ul className="flex items-center gap-4 text-lg">
                         <li><button className="cursor-pointer group relative" onClick={() => handleScroll("#homePage")}>
@@ -184,7 +180,7 @@ export default function NavbarComponent() {
                             <Link href="/cartPage" className="btn btn-ghost btn-circle relative">
                                 <ShoppingCart size={20} />
                             </Link>
-                            <NotificationDropdown />
+                            <NotificationButton />
                         </div>
 
                         <div className="border-t border-gray-200 my-4" />

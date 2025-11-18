@@ -4,7 +4,7 @@ import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
-import ToastComponent from "@/components/ToastComponent/Toast"
+import ToastComponent from "@/components/Toast/Toast"
 
 export default function LoginPage() {
     const router = useRouter()

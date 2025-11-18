@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import SessionProviderWrapper from "@/components/ProviderComponent/SessionProvider";
+import SessionProviderWrapper from "@/components/SessionProvider/SessionProvider";
 
 export const metadata: Metadata = {
   title: "Black Angel Store",

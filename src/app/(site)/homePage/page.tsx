@@ -13,7 +13,7 @@ export default function HomePage() {
                 id="homePage"
                 className="w-full h-full min-h-dvh md:max-h-[90vh] overflow-hidden flex items-center justify-center px-8 md:px-4 relative"
             >
-                <span className="absolute inset-0 bg-secondary/10 -z-50"></span>
+                <span className="absolute inset-0 bg-secondary/10"></span>
                 <div className="flex flex-col md:flex-row items-center justify-around gap-10 w-full">
                     {/* Left Content */}
                     <div className="flex flex-col justify-center gap-4 text-center md:text-left max-w-md">

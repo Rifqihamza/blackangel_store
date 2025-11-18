@@ -1,5 +1,5 @@
-import NavbarComponent from "@/components/NavbarComponent/NavbarComponent";
-import FooterComponent from "@/components/FooterComponent/FooterComponent";
+import NavbarComponent from "@/components/Navbar/Navbar";
+import FooterComponent from "@/components/Footer/Footer";
 
 export default function SiteLayout({
     children,
@@ -7,7 +7,7 @@ export default function SiteLayout({
     children: React.ReactNode;
 }) {
     return (
-        <main >
+        <main>
             <NavbarComponent />
             <div>
                 {children}
